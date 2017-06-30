@@ -1,12 +1,21 @@
+import model.Player;
+import model.Players;
+import rule.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class TennisGameImpl implements TennisGame {
 
     private Player player1;
     private Player player2;
 
+    private List<Rule> rules;
+
     public TennisGameImpl(String player1Name, String player2Name) {
         this.player1 = Players.create(player1Name);
         this.player2 = Players.create(player2Name);
+        this.rules = Arrays.asList(new DeuceRule(), new EqualsRule(), new AdvantageRule(), new WinRule());
     }
 
     public void wonPoint(String playerName) {
@@ -14,20 +23,10 @@ public class TennisGameImpl implements TennisGame {
     }
 
     public String getScore() {
-        String score;
+        String score = player1.getScore().toString() + "-" + player2.getScore().toString();
 
-        if (player1.getScore().equals(player2.getScore())) {
-            score = player1.getScore().atleastThreePoints()? "Deuce": player1.getScore().toString() + "-All";
-        } else if (player1.getScore().winOver(player2.getScore())) {
-            score = "Win for " + player1.getName();
-        } else if (player2.getScore().winOver(player1.getScore())) {
-            score = "Win for " + player2.getName();
-        } else if (player1.getScore().advantageOver(player2.getScore())) {
-            score = "Advantage " + player1.getName();
-        } else if (player2.getScore().advantageOver(player1.getScore())) {
-            score = "Advantage " + player2.getName();
-        } else {
-            score = player1.getScore().toString() + "-" + player2.getScore().toString();
+        for (Rule rule : this.rules) {
+            score = rule.summarizeScore(player1, player2, score);
         }
 
         return score;
